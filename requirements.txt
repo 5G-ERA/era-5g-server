@@ -1,0 +1,8 @@
+era_5g_interface~=0.6.1
+flask==2.2.*
+simple-websocket==1.0.0
+pymongo
+strenum~=0.4.15
+ujson~=5.8.0
+types-ujson~=5.8.0.1
+python-socketio~=5.10.0
