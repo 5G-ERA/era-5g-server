@@ -3,6 +3,7 @@ python_requirements(
     source="requirements.txt",
     module_mapping={
         "opencv-python": ["cv2"],
+        "python-socketio": ["socketio"],
     },
 )
 
