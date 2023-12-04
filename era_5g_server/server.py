@@ -38,7 +38,7 @@ class NetworkApplicationServer(Process):
         *args,
         command_callback: Optional[Callable[[ControlCommand, str], Tuple[bool, str]]] = None,
         disconnect_callback: Optional[Callable[[str], None]] = None,
-        back_pressure_size: int = 5,
+        back_pressure_size: Optional[int] = 5,
         recreate_h264_attempts_count: int = 5,
         stats: bool = False,
         host: str = "0.0.0.0",
@@ -50,17 +50,17 @@ class NetworkApplicationServer(Process):
 
         Args:
             port (int): The port number on which the websocket server should run.
-            callbacks_info (Dict[str, CallbackInfoServer]): Callbacks Info dictionary, key is custom event name
-            *args: Process arguments
-            command_callback (Optional[Callable[[ControlCommand, str], None]]): On control command callback
-            disconnect_callback (Optional[Callable[[str], None]]): On data namespace disconnect callback
-            back_pressure_size (int): Back pressure size - max size of eio.sockets[eio_sid].queue.qsize()
-            recreate_h264_attempts_count (int): How many times try to recreate the H.264 encoder
-            stats (bool): Store output data sizes
+            callbacks_info (Dict[str, CallbackInfoServer]): Callbacks Info dictionary, key is custom event name.
+            *args: Process arguments.
+            command_callback (Callable[[ControlCommand, str], None], optional): On control command callback.
+            disconnect_callback (Callable[[str], None], optional): On data namespace disconnect callback.
+            back_pressure_size (int, optional): Back pressure size - max size of eio.sockets[eio_sid].queue.qsize().
+            recreate_h264_attempts_count (int): How many times try to recreate the H.264 encoder/decoder.
+            stats (bool): Store output data sizes.
             host (str): The IP address of the interface, where the websocket server should run. Defaults to "0.0.0.0".
             async_handlers (bool): Specify, if the incoming messages. Defaults to False.
             max_message_size (float): The maximum size of the message to be passed in MB. Defaults to 5.
-            **kwargs: Process arguments
+            **kwargs: Process arguments.
         """
 
         super().__init__(*args, **kwargs)
