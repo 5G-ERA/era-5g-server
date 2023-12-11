@@ -1,5 +1,5 @@
 [GLOBAL]
-pants_version = "2.16.0"
+pants_version = "2.18.0"
 backend_packages.add = [
   "pants.backend.build_files.fmt.black",
   "pants.backend.python",
@@ -9,6 +9,9 @@ backend_packages.add = [
   "pants.backend.python.lint.isort",
   "pants.backend.python.typecheck.mypy",
 ]
+
+[generate-lockfiles]
+diff = true
 
 [anonymous-telemetry]
 enabled = true
