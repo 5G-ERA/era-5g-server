@@ -21,7 +21,8 @@ class NetworkApplicationServer(Process):
     How to send data? E.g.:
         client.send_image(frame, "image", ChannelType.H264, timestamp, encoding_options=h264_options, sid=sid)
         client.send_image(frame, "image", ChannelType.JPEG, timestamp, metadata, sid)
-        client.send_data({"message": "message text"}, "event_name", sid)
+        client.send_data({"message": "message text"}, "event_name", sid=sid)
+        client.send_data({"message": "message text"}, "event_name", ChannelType.JSON_LZ4, sid=sid)
     How to create callbacks_info? E.g.:
         {
             "results": CallbackInfoServer(ChannelType.JSON, results_callback),
