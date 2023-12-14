@@ -1,4 +1,4 @@
-era-5g-interface~=0.7.0
+era-5g-interface~=0.8.0
 flask>=3.0.0
 python-engineio>=4.8.0
 python-socketio>=5.10.0
