@@ -9,7 +9,7 @@ python_distribution(
     sdist=True,
     provides=setup_py(
         name="era_5g_server",
-        version="0.1.0",
+        version="0.2.0",
         description="Barebones of 5G-ERA Network Applications",
         author="Michal Kapinus",
         author_email="ikapinus@fit.vutbr.cz",
