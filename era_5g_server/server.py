@@ -40,7 +40,7 @@ class NetworkApplicationServer(Process):
         command_callback: Optional[Callable[[ControlCommand, str], Tuple[bool, str]]] = None,
         disconnect_callback: Optional[Callable[[str], None]] = None,
         back_pressure_size: Optional[int] = 5,
-        recreate_h264_attempts_count: int = 5,
+        recreate_coder_attempts_count: int = 5,
         disconnect_on_unhandled: bool = True,
         stats: bool = False,
         host: str = "0.0.0.0",
@@ -57,7 +57,7 @@ class NetworkApplicationServer(Process):
             command_callback (Callable[[ControlCommand, str], None], optional): On control command callback.
             disconnect_callback (Callable[[str], None], optional): On data namespace disconnect callback.
             back_pressure_size (int, optional): Back pressure size - max size of eio.sockets[eio_sid].queue.qsize().
-            recreate_h264_attempts_count (int): How many times try to recreate the H.264 encoder/decoder.
+            recreate_coder_attempts_count (int): How many times try to recreate the frame encoder/decoder.
             disconnect_on_unhandled (bool): Whether to call self._sio.disconnect(...) if unhandled exception occurs.
             stats (bool): Store output data sizes.
             host (str): The IP address of the interface, where the websocket server should run. Defaults to "0.0.0.0".
@@ -90,7 +90,7 @@ class NetworkApplicationServer(Process):
             callbacks_info=callbacks_info,
             disconnect_callback=self._sio.disconnect if disconnect_on_unhandled else None,
             back_pressure_size=back_pressure_size,
-            recreate_h264_attempts_count=recreate_h264_attempts_count,
+            recreate_coder_attempts_count=recreate_coder_attempts_count,
             stats=stats,
         )
 
