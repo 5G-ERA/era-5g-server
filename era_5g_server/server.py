@@ -1,4 +1,6 @@
 import logging
+import math
+import os
 from multiprocessing import Process
 from typing import Any, Callable, Dict, Optional, Tuple
 
@@ -9,9 +11,71 @@ from flask import Flask
 
 from era_5g_interface.channels import COMMAND_ERROR_EVENT, CONTROL_NAMESPACE, DATA_NAMESPACE, CallbackInfoServer
 from era_5g_interface.dataclasses.control_command import ControlCommand
+from era_5g_interface.interface_helpers import MIDDLEWARE_ADDRESS
 from era_5g_interface.server_channels import ServerChannels
 
 logger = logging.getLogger(__name__)
+
+# Middleware Network Application ID (task ID, NETAPP_ID).
+MIDDLEWARE_TASK_ID = str(
+    os.getenv("MIDDLEWARE_TASK_ID", os.getenv("NETAPP_ID", "00000000-0000-0000-0000-000000000000"))
+)
+# NETAPP_ID used for compatibility.
+NETAPP_ID = MIDDLEWARE_TASK_ID
+NETAPP_ID_ROS = NETAPP_ID.replace("-", "_")
+
+NETAPP_NAME = str(os.getenv("NETAPP_NAME", "Unknown"))
+
+# Used for Network Application heartbeat.
+MAX_LATENCY = float(os.getenv("NETAPP_MAX_LATENCY", 100))
+
+NETAPP_STATUS_ADDRESS = (
+    MIDDLEWARE_ADDRESS if MIDDLEWARE_ADDRESS.endswith("/status/netapp") else MIDDLEWARE_ADDRESS + "/status/netapp"
+)
+
+
+def generate_application_heartbeat_data(
+    avg_latency: float,
+    queue_size: int,
+    queue_occupancy: float,
+    current_robot_count: int,
+) -> Dict:
+    """Generate application heartbeat JSON data.
+
+    Args:
+        avg_latency (float): Average latency.
+        queue_size (int): Queue size.
+        queue_occupancy (float): Queue occupancy.
+        current_robot_count (int): Current robot count.
+    """
+
+    # Latency can change over time, so reporting just the simple que occupancy can be misleading.
+    # Instead, it is better to report occupancy in terms of:
+    #  'total time estimated to be needed to process everything in the queue' / 'required max latency'
+    processing_time_occupancy = queue_size * avg_latency / MAX_LATENCY
+
+    if queue_size == 0:
+        # If the queue is empty then no estimate can be made about robot count limit,
+        # but most likely at least one more robot can be added.
+        hard_robot_count_limit = current_robot_count + 1
+        optimal_robot_count_limit = current_robot_count + 1
+    elif avg_latency == 0:
+        # If there are no latency measurements, the maximum number of robots cannot be estimated
+        # using processing_time_occupancy, but we can still try to use queue_occupancy.
+        hard_robot_count_limit = math.floor(current_robot_count / queue_occupancy)
+        optimal_robot_count_limit = math.floor(hard_robot_count_limit * 0.8)
+    else:
+        hard_robot_count_limit = math.floor(current_robot_count / processing_time_occupancy)
+        optimal_robot_count_limit = math.floor(hard_robot_count_limit * 0.8)
+
+    data = {
+        "id": MIDDLEWARE_TASK_ID,  # String
+        "name": NETAPP_NAME,  # Optional, string
+        "currentRobotsCount": current_robot_count,  # Nullable, integer
+        "optimalLimit": optimal_robot_count_limit,  # Integer
+        "hardLimit": hard_robot_count_limit,  # Integer
+    }
+    return data
 
 
 class NetworkApplicationServer(Process):
@@ -43,6 +107,7 @@ class NetworkApplicationServer(Process):
         recreate_coder_attempts_count: int = 5,
         disconnect_on_unhandled: bool = True,
         stats: bool = False,
+        extended_measuring: bool = False,
         host: str = "0.0.0.0",
         async_handlers: bool = False,
         max_message_size: float = 5,
@@ -92,6 +157,7 @@ class NetworkApplicationServer(Process):
             back_pressure_size=back_pressure_size,
             recreate_coder_attempts_count=recreate_coder_attempts_count,
             stats=stats,
+            extended_measuring=extended_measuring,
         )
 
         # Save custom command and disconnect callbacks.
