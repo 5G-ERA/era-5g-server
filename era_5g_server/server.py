@@ -125,6 +125,7 @@ class NetworkApplicationServer(Process):
             recreate_coder_attempts_count (int): How many times try to recreate the frame encoder/decoder.
             disconnect_on_unhandled (bool): Whether to call self._sio.disconnect(...) if unhandled exception occurs.
             stats (bool): Store output data sizes.
+            extended_measuring (bool): Enable logging of measuring.
             host (str): The IP address of the interface, where the websocket server should run. Defaults to "0.0.0.0".
             async_handlers (bool): Specify, if the incoming messages. Defaults to False.
             max_message_size (float): The maximum size of the message to be passed in MB. Defaults to 5.
@@ -259,6 +260,15 @@ class NetworkApplicationServer(Process):
         """
 
         return self._channels.get_client_eio_sid(sid, CONTROL_NAMESPACE)
+
+    def disconnect(self, sid: str) -> None:
+        """Disconnects the client from DATA_NAMESPACE by sid.
+
+        Args:
+            sid (str): Namespace sid.
+        """
+
+        self._sio.disconnect(sid, DATA_NAMESPACE)
 
     def send_command_error(self, message: str, sid: str):
         """Send control command error message to client.
