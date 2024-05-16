@@ -3,6 +3,7 @@ import math
 import os
 from multiprocessing import Process
 from typing import Any, Callable, Dict, Optional, Tuple
+from urllib.parse import urljoin
 
 import socketio
 import ujson
@@ -29,9 +30,10 @@ NETAPP_NAME = str(os.getenv("NETAPP_NAME", "Unknown"))
 # Used for Network Application heartbeat.
 MAX_LATENCY = float(os.getenv("NETAPP_MAX_LATENCY", 100))
 
-NETAPP_STATUS_ADDRESS = (
-    MIDDLEWARE_ADDRESS if MIDDLEWARE_ADDRESS.endswith("/status/netapp") else MIDDLEWARE_ADDRESS + "/status/netapp"
-)
+if MIDDLEWARE_ADDRESS.endswith("/status/netapp"):
+    NETAPP_STATUS_ADDRESS = MIDDLEWARE_ADDRESS
+else:
+    NETAPP_STATUS_ADDRESS = urljoin(MIDDLEWARE_ADDRESS, "status/netapp")
 
 
 def generate_application_heartbeat_data(
